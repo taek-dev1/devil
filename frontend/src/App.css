@@ -1,10 +1,13 @@
 
-/* React 최상위 영역 */
+/* ===================================
+   1. 전체 레이아웃
+=================================== */
+
 #root {
   min-height: 100vh;
 }
 
-/* 상단 헤더 */
+/* 헤더 */
 header {
   background-color: #17243a;
   border-bottom: 1px solid #304259;
@@ -24,66 +27,215 @@ header p {
   font-size: 14px;
 }
 
-/* 메인 콘텐츠 영역 */
-main {
+/* 메인 콘텐츠 */
+.page-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px;
 }
 
-main h2 {
+.page-content h2 {
+  margin: 0 0 16px;
   font-size: 24px;
-  margin-bottom: 16px;
 }
 
-main p {
+.page-content > p {
+  margin: 0 0 24px;
   color: #cbd5e1;
 }
 
 
-/* 게임 카드 */
-.game-card {
-  background-color: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 12px;
-  padding: 24px;
-  margin-top: 16px;
-}
+/* ===================================
+   2. 게임 목록
+=================================== */
 
-/* 게임 카드 제목 */
-.game-card h3 {
-  margin: 0 0 12px;
-  color: #ffffff;
-  font-size: 20px;
-}
-
-/* 게임 카드 설명 */
-.game-card p {
-  margin: 0;
-  color: #94a3b8;
-  font-size: 14px;
-}
-
-/* 마우스를 올렸을 때 */
-.game-card:hover {
-  border-color: #60a5fa;
-}
-
-/* 게임 목록 가로 배치 */
 .game-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
-/* 카드 간격은 Grid가 담당 */
+
+/* ===================================
+   3. 게임 카드 공통 디자인
+=================================== */
+
 .game-card {
-  margin-top: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  background: linear-gradient(
+          180deg,
+          #1e293b 0%,
+          #172033 100%
+  );
+
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+
+  transition:
+          transform 0.2s ease,
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
 }
 
-/* 작은 화면에서는 세로 배치 */
+.game-card:hover {
+  border-color: #60a5fa;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+
+/* ===================================
+   4. 게임 대표 이미지 / 아이콘
+=================================== */
+
+.game-card-media {
+  height: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+          135deg,
+          #243b62,
+          #16243c
+  );
+
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  color: #93c5fd;
+}
+
+.game-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ===================================
+   5. 게임 제목 및 설명
+=================================== */
+
+.game-card-content {
+  flex: 1;
+}
+
+.game-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  margin-bottom: 14px;
+
+  border-radius: 999px;
+  background-color: rgba(37, 99, 235, 0.18);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.game-card h3 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.game-card p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+/* ===================================
+   6. 대전 버튼 공통 디자인
+=================================== */
+
+.game-card-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.game-button {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 10px;
+  border: none;
+  border-radius: 10px;
+
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition:
+          transform 0.15s ease,
+          filter 0.15s ease;
+}
+
+.game-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.game-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+/* AI 대전 버튼 */
+.game-button--ai {
+  background: linear-gradient(
+          135deg,
+          #2563eb,
+          #3b82f6
+  );
+}
+
+/* 사람 대전 버튼 */
+.game-button--player {
+  background: linear-gradient(
+          135deg,
+          #0f766e,
+          #14b8a6
+  );
+}
+
+
+/* ===================================
+   7. 반응형 화면
+=================================== */
+
 @media (max-width: 600px) {
+  .page-content {
+    padding: 24px 16px;
+  }
+
   .game-grid {
     grid-template-columns: 1fr;
+  }
+
+  .game-card {
+    padding: 18px;
+  }
+
+  header {
+    padding: 20px 16px;
   }
 }
