@@ -217,6 +217,34 @@ header p {
   );
 }
 
+/* ===================================
+   8. 게임 검색창
+=================================== */
+
+.game-search {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+
+  color: #ffffff;
+  font-size: 15px;
+
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.game-search::placeholder {
+  color: #94a3b8;
+}
+
+/* 검색창을 클릭했을 때 */
+.game-search:focus {
+  border-color: #60a5fa;
+}
 
 /* ===================================
    7. 반응형 화면
@@ -226,7 +254,6 @@ header p {
   .page-content {
     padding: 24px 16px;
   }
-
   .game-grid {
     grid-template-columns: 1fr;
   }
