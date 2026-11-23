@@ -246,6 +246,42 @@ header p {
   border-color: #60a5fa;
 }
 
+/* 게임 카테고리 필터 */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 24px;
+}
+
+.category-filter {
+  padding: 10px 18px;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: #1e293b;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-filter:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.category-filter.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.category-filter:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
 /* ===================================
    7. 반응형 화면
 =================================== */
@@ -265,4 +301,6 @@ header p {
   header {
     padding: 20px 16px;
   }
+
+
 }
