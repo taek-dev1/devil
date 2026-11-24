@@ -1,9 +1,12 @@
 
 import { useState } from 'react';
+import { Route, Routes } from 'react-router';
 import './App.css';
 import Header from './components/Header';
 import GameCard from './components/GameCard';
 import { games } from './data/games';
+import { playModes } from './data/playModes';
+import { GameDetailPage, GameModePage, GameRoute, NotFoundPage } from './pages/GamePages';
 
 function App() {
     // 검색어 상태
@@ -33,56 +36,72 @@ function App() {
         return matchesSearch && matchesCategory;
     });
 
+    const gameList = (
+        <main className="page-content">
+            <h2>게임 목록</h2>
+            <p>게임을 선택해 주세요.</p>
+
+            {/* 게임 검색창 */}
+            <input
+                className="game-search"
+                type="text"
+                placeholder="게임 이름을 검색하세요..."
+                value={searchTerm}
+                onChange={(e ) => setSearchTerm(e.target.value)}
+            />
+
+            {/* 카테고리 필터 버튼 */}
+            <div
+                className="category-filters"
+                role="group"
+                aria-label="게임 카테고리"
+            >
+                {categories.map((category) => (
+                    <button
+                        key={category}
+                        type="button"
+                        className={`category-filter ${
+                            selectedCategory === category ? 'active' : ''
+                        }`}
+                        aria-pressed={selectedCategory === category}
+                        onClick={() => setSelectedCategory(category)}
+                    >
+                        {category}
+                    </button>
+                ))}
+            </div>
+
+            {/* 필터링된 게임 목록 */}
+            <div className="game-grid">
+                {filteredGames.map((game) => (
+                    <GameCard key={game.id} game={game} />
+                ))}
+            </div>
+
+            {/* 검색 결과가 없을 때 */}
+            {filteredGames.length === 0 && (
+                <p>검색 결과가 없습니다.</p>
+            )}
+        </main>
+    );
+
     return (
         <>
             <Header />
-
-            <main className="page-content">
-                <h2>게임 목록</h2>
-                <p>게임을 선택해 주세요.</p>
-
-                {/* 게임 검색창 */}
-                <input
-                    className="game-search"
-                    type="text"
-                    placeholder="게임 이름을 검색하세요..."
-                    value={searchTerm}
-                    onChange={(e ) => setSearchTerm(e.target.value)}
-                />
-
-                {/* 카테고리 필터 버튼 */}
-                <div
-                    className="category-filters"
-                    role="group"
-                    aria-label="게임 카테고리"
-                >
-                    {categories.map((category) => (
-                        <button
-                            key={category}
-                            type="button"
-                            className={`category-filter ${
-                                selectedCategory === category ? 'active' : ''
-                            }`}
-                            aria-pressed={selectedCategory === category}
-                            onClick={() => setSelectedCategory(category)}
-                        >
-                            {category}
-                        </button>
+            <Routes>
+                <Route path="/" element={gameList} />
+                <Route path="/games/:gameId" element={<GameRoute />}>
+                    <Route index element={<GameDetailPage />} />
+                    {playModes.map((mode) => (
+                        <Route
+                            key={mode.id}
+                            path={mode.path}
+                            element={<GameModePage mode={mode} />}
+                        />
                     ))}
-                </div>
-
-                {/* 필터링된 게임 목록 */}
-                <div className="game-grid">
-                    {filteredGames.map((game) => (
-                        <GameCard key={game.id} game={game} />
-                    ))}
-                </div>
-
-                {/* 검색 결과가 없을 때 */}
-                {filteredGames.length === 0 && (
-                    <p>검색 결과가 없습니다.</p>
-                )}
-            </main>
+                </Route>
+                <Route path="*" element={<NotFoundPage />} />
+            </Routes>
         </>
     );
 }

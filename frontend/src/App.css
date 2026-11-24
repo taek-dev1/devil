@@ -148,6 +148,19 @@ header p {
   font-size: 22px;
 }
 
+.game-card-title {
+  color: inherit;
+}
+
+.game-card-title:hover {
+  color: #93c5fd;
+}
+
+.game-card-title:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
 .game-card p {
   margin: 0;
   color: #94a3b8;
@@ -182,6 +195,7 @@ header p {
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
 
   transition:

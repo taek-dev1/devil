@@ -1,6 +1,7 @@
 
 import { Grid3X3, Hash } from 'lucide-react';
 
+// 상세 페이지에는 선택적으로 introduction(문자열), rules와 instructions(문자열 배열)를 추가할 수 있습니다.
 export const games = [
     {
         id: 'blind-omok',
@@ -9,6 +10,8 @@ export const games = [
         category: '전략 게임',
         image: null,
         icon: Grid3X3,
+        rules: [],
+        instructions: [],
     },
     {
         id: 'number-game',
@@ -17,5 +20,7 @@ export const games = [
         category: '심리 게임',
         image: null,
         icon: Hash,
+        rules: [],
+        instructions: [],
     },
 ];
