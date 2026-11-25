@@ -7,7 +7,8 @@
 
 .omok-heading,
 .omok-board-heading,
-.omok-choice-row {
+.omok-choice-row,
+.omok-hint-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -76,6 +77,11 @@
     height: auto;
     border-radius: 12px;
     box-shadow: 0 6px 12px rgb(4 8 15 / 38%);
+    touch-action: manipulation;
+}
+
+.omok-board-target {
+    cursor: crosshair;
 }
 
 .omok-board-card figcaption {
@@ -87,6 +93,25 @@
     margin: 0;
     padding: 0;
     border: 0;
+}
+
+.omok-settings summary {
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.omok-settings[open] summary {
+    margin-bottom: 12px;
+}
+
+.omok-settings-summary {
+    display: block;
+    margin-top: 6px;
+    color: var(--omok-muted);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .omok-choice-row {
@@ -117,7 +142,8 @@
     background: #203b60;
 }
 
-.omok-panel button:focus-visible {
+.omok-panel button:focus-visible,
+.omok-settings summary:focus-visible {
     outline: 2px solid var(--omok-accent);
     outline-offset: 2px;
 }
@@ -166,10 +192,28 @@
     line-height: 1.5;
 }
 
-.omok-panel .omok-colors + .omok-hint,
-.omok-panel .omok-note + .omok-colors,
+.omok-hint-row,
 .omok-actions {
     margin-top: 8px;
+}
+
+.omok-hint-row {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.omok-current-status {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--omok-border);
+    border-radius: 8px;
+    background: #101827;
+    color: var(--omok-accent);
+    font-size: 21px;
+}
+
+.omok-current-status .omok-note {
+    margin-top: 4px;
 }
 
 .omok-actions button {

@@ -1,44 +1,42 @@
-import { useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import OmokBoard from './OmokBoard';
 import { GameSettings, GameStatus, GameControls, GameRules } from './OmokPanels';
+import { STONE_COLORS } from './omokColors';
+import { BOARD_SIZE, canPlay, canUseHint, createOmokGame, getGameStatus, omokReducer } from './omokGame';
 import './BlindOmokPage.css';
 
-const colors = [
-    { id: 'black', name: '검정', fill: '#252830' },
-    { id: 'white', name: '흰색', fill: '#f8fafc' },
-    { id: 'red', name: '빨강', fill: '#ef555c' },
-    { id: 'orange', name: '주황', fill: '#f99142' },
-    { id: 'yellow', name: '노랑', fill: '#f6d154' },
-    { id: 'green', name: '초록', fill: '#56bc76' },
-    { id: 'blue', name: '파랑', fill: '#528df5' },
-    { id: 'navy', name: '남색', fill: '#354896' },
-    { id: 'purple', name: '보라', fill: '#a678e3' },
-];
-
-const requiredColors = colors.slice(0, 2);
-const colorLimit = 7;
+const boardNotes = {
+    setup: '보드 미리보기 · 예시 돌이 표시됩니다.',
+    player: '빈 교차점을 클릭하거나 터치해 돌을 놓으세요.',
+    hint: '실제 흑백을 공개하는 동안 착수를 멈춥니다.',
+    win: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
+    loss: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
+    draw: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
+};
 
 export default function BlindOmokPage({ title, modeTitle }) {
-    const [settings, setSettings] = useState({ side: 'black', difficulty: 'medium', extraColors: [] });
-    const [started, setStarted] = useState(false);
-    const palette = colors.filter(({ id }) => requiredColors.some((color) => color.id === id) || settings.extraColors.includes(id));
+    const [game, dispatch] = useReducer(omokReducer, undefined, createOmokGame);
+    const { settings, phase, selectedColor, hintsLeft, hintExpiresAt } = game;
+    const palette = STONE_COLORS.filter(({ id }) => settings.colorIds.includes(id));
+    const status = getGameStatus(game);
+    const canPlace = canPlay(game, settings.side);
 
-    function updateSetting(key, value) {
-        setSettings((current) => ({ ...current, [key]: value }));
-    }
+    useEffect(() => {
+        if (hintExpiresAt === null) return;
 
-    function toggleColor(id) {
-        setSettings((current) => {
-            const { extraColors } = current;
-            if (extraColors.includes(id)) {
-                return { ...current, extraColors: extraColors.filter((color) => color !== id) };
+        let timer;
+        function expireHint() {
+            const now = performance.now();
+            const remaining = hintExpiresAt - now;
+            if (remaining > 0) {
+                timer = window.setTimeout(expireHint, Math.ceil(remaining));
+            } else {
+                dispatch({ type: 'expireHint', now });
             }
-            if (extraColors.length + requiredColors.length >= colorLimit) {
-                return current;
-            }
-            return { ...current, extraColors: [...extraColors, id] };
-        });
-    }
+        }
+        expireHint();
+        return () => window.clearTimeout(timer);
+    }, [hintExpiresAt]);
 
     return (
         <div className="omok-page">
@@ -50,29 +48,36 @@ export default function BlindOmokPage({ title, modeTitle }) {
                 <section className="omok-board-card" aria-labelledby="omok-board-title">
                     <div className="omok-board-heading">
                         <h3 id="omok-board-title">오목판</h3>
-                        <span>15 × 15</span>
+                        <span>{BOARD_SIZE} × {BOARD_SIZE}</span>
                     </div>
                     <figure>
-                        <OmokBoard preview={!started} />
-                        <figcaption>{started ? '착수 기능은 준비 중입니다.' : '보드 미리보기 · 예시 돌이 표시됩니다.'}</figcaption>
+                        <OmokBoard
+                            game={game}
+                            canPlace={canPlace}
+                            onPlay={(row, col) => dispatch({ type: 'play', row, col, owner: settings.side })}
+                        />
+                        {boardNotes[status] && <figcaption>{boardNotes[status]}</figcaption>}
                     </figure>
                 </section>
                 <div className="omok-panels">
                     <GameSettings
                         settings={settings}
-                        colors={colors}
-                        requiredColors={requiredColors}
-                        colorLimit={colorLimit}
-                        locked={started}
-                        onChange={updateSetting}
-                        onToggleColor={toggleColor}
+                        locked={phase !== 'setup'}
+                        onSideChange={(side) => dispatch({ type: 'setSide', side })}
+                        onDifficultyChange={(difficulty) => dispatch({ type: 'setDifficulty', difficulty })}
+                        onToggleColor={(colorId) => dispatch({ type: 'toggleColor', colorId })}
                     />
-                    <GameStatus side={settings.side} started={started} />
+                    <GameStatus side={settings.side} status={status} />
                     <GameControls
                         palette={palette}
-                        started={started}
-                        onStart={() => setStarted(true)}
-                        onReset={() => setStarted(false)}
+                        phase={phase}
+                        selectedColor={selectedColor}
+                        hintsLeft={hintsLeft}
+                        canHint={canUseHint(game)}
+                        onColorChange={(colorId) => dispatch({ type: 'selectColor', colorId })}
+                        onHint={() => dispatch({ type: 'useHint', now: performance.now() })}
+                        onStart={() => dispatch({ type: 'start' })}
+                        onReset={() => dispatch({ type: 'reset' })}
                     />
                     <GameRules />
                 </div>
