@@ -1,0 +1,232 @@
+.omok-page {
+    --omok-border: #334155;
+    --omok-panel: #172033;
+    --omok-muted: #b6c6db;
+    --omok-accent: #93c5fd;
+}
+
+.omok-heading,
+.omok-board-heading,
+.omok-choice-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.omok-heading {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin: 8px 0 18px;
+}
+
+.omok-heading h2,
+.omok-heading .game-badge {
+    margin: 0;
+}
+
+.omok-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+    align-items: start;
+    gap: 20px;
+}
+
+.omok-panels {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.omok-board-card,
+.omok-panel {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--omok-border);
+    border-radius: 16px;
+    background: var(--omok-panel);
+    box-shadow: 0 8px 18px rgb(5 10 20 / 20%);
+}
+
+.omok-page h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.omok-panel h3,
+.omok-board-heading {
+    margin-bottom: 12px;
+}
+
+.omok-board-heading span,
+.omok-board-card figcaption,
+.omok-note,
+.omok-color-count {
+    color: var(--omok-muted);
+    font-size: 13px;
+}
+
+.omok-board-card figure {
+    margin: 0;
+}
+
+.omok-board {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgb(4 8 15 / 38%);
+}
+
+.omok-board-card figcaption {
+    margin-top: 10px;
+}
+
+.omok-panel fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.omok-choice-row {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.omok-choices,
+.omok-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.omok-panel button {
+    min-height: 38px;
+    padding: 6px 10px;
+    border: 1px solid var(--omok-border);
+    border-radius: 8px;
+    background: #101827;
+    color: #e2e8f0;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.omok-panel button[aria-pressed='true'] {
+    border-color: var(--omok-accent);
+    background: #203b60;
+}
+
+.omok-panel button:focus-visible {
+    outline: 2px solid var(--omok-accent);
+    outline-offset: 2px;
+}
+
+.omok-panel button:disabled {
+    cursor: default;
+}
+
+.omok-panel button:disabled:not([aria-pressed='true']) {
+    color: #9daec5;
+    background: #141e2e;
+}
+
+.omok-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.omok-panel .omok-color {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 3px;
+    min-width: 42px;
+    min-height: 46px;
+    padding: 3px;
+    font-size: 11px;
+}
+
+.omok-swatch {
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgb(255 255 255 / 40%);
+    border-radius: 50%;
+    background: var(--omok-color);
+}
+
+.omok-panel button[aria-pressed='true'] .omok-swatch {
+    outline: 1px solid #e2e8f0;
+    outline-offset: 2px;
+}
+
+.omok-note {
+    margin: 8px 0 0;
+    line-height: 1.5;
+}
+
+.omok-panel .omok-colors + .omok-hint,
+.omok-panel .omok-note + .omok-colors,
+.omok-actions {
+    margin-top: 8px;
+}
+
+.omok-actions button {
+    flex: 1;
+    min-height: 44px;
+    font-weight: 700;
+}
+
+.omok-actions .omok-primary:not(:disabled) {
+    border-color: #60a5fa;
+    background: #60a5fa;
+    color: #101827;
+}
+
+.omok-status {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.omok-status div {
+    padding: 7px 8px;
+    border-radius: 8px;
+    background: #101827;
+}
+
+.omok-status dt {
+    color: var(--omok-muted);
+    font-size: 12px;
+}
+
+.omok-status dd {
+    margin: 4px 0 0;
+    color: #e2e8f0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.omok-rules {
+    margin: 0;
+    padding-inline-start: 18px;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+@media (max-width: 760px) {
+    .omok-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .omok-board-card,
+    .omok-panel {
+        padding: 12px;
+    }
+}

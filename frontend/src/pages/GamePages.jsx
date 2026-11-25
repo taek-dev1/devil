@@ -3,6 +3,7 @@ import { Link, Outlet, useOutletContext, useParams } from 'react-router';
 import GameArtwork from '../components/GameArtwork';
 import GameModeLinks from '../components/GameModeLinks';
 import { games } from '../data/games';
+import BlindOmokPage from './blind-omok/BlindOmokPage';
 import './GamePages.css';
 
 function BackLink({ to, children }) {
@@ -80,6 +81,15 @@ export function GameDetailPage() {
 
 export function GameModePage({ mode }) {
     const game = useOutletContext();
+
+    if (game.id === 'blind-omok' && mode.id === 'ai') {
+        return (
+            <main className="page-content">
+                <BackLink to="..">게임 상세로 돌아가기</BackLink>
+                <BlindOmokPage title={game.title} modeTitle={mode.title} />
+            </main>
+        );
+    }
 
     return (
         <main className="page-content game-page">
