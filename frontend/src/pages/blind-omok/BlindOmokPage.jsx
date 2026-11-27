@@ -1,9 +1,11 @@
 import { useEffect, useReducer, useState } from 'react';
 import OmokBoard from './OmokBoard';
+import OmokReview from './OmokReview.jsx';
 import { GameSettings, GameStatus, GameControls, GameRules } from './OmokPanels';
 import { STONE_COLORS } from './omokColors';
-import { BOARD_SIZE, HINT_DURATION, canPlay, canUseHint, createOmokGame, getGameStatus, omokReducer } from './omokGame';
+import { BOARD_SIZE, HINT_DURATION, canPlay, canUseHint, createDefaultAiGame, getGameStatus, omokReducer } from './omokGame';
 import { scheduleHintCountdown } from './omokHintTimer';
+import { getReviewFrame } from './omokReviewFrame.js';
 import { useOmokAi } from './useOmokAi';
 import './BlindOmokPage.css';
 
@@ -11,17 +13,25 @@ const boardNotes = {
     setup: '보드 미리보기 · 예시 돌이 표시됩니다.',
     playing: '내 차례에 빈 교차점을 클릭하거나 터치해 돌을 놓으세요.',
     hint: '실제 흑백을 공개하는 동안 착수를 멈춥니다.',
-    finished: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
+    finished: '게임 종료',
 };
 
 export default function BlindOmokPage({ title, modeTitle }) {
-    const [game, dispatch] = useReducer(omokReducer, undefined, createOmokGame);
+    const [game, dispatch] = useReducer(omokReducer, undefined, createDefaultAiGame);
     const [countdown, setCountdown] = useState(null);
+    const [review, setReview] = useState(undefined);
     const { settings, phase, selectedColor, hintsLeft, hintExpiresAt } = game;
     const palette = STONE_COLORS.filter(({ id }) => settings.colorIds.includes(id));
     const ai = useOmokAi(game, dispatch);
     const status = getGameStatus(game, ai.thinking);
-    const canPlace = canPlay(game, settings.side);
+    const placement = canPlay(game, settings.side) ? {
+        board: game.board,
+        tone: selectedColor,
+        onPlay: (row, col) => dispatch({ type: 'play', row, col, owner: settings.side }),
+    } : null;
+    const reviewFrame = phase === 'finished'
+        ? getReviewFrame(game.moves, game.result.winningLines, review)
+        : null;
     const boardNote = hintExpiresAt !== null ? 'hint' : phase;
     const hintSeconds = hintExpiresAt === null ? null
         : countdown?.expiresAt === hintExpiresAt ? countdown.seconds : HINT_DURATION / 1000;
@@ -35,6 +45,11 @@ export default function BlindOmokPage({ title, modeTitle }) {
             (now) => dispatch({ type: 'expireHint', now }),
         );
     }, [hintExpiresAt]);
+
+    function resetGame() {
+        setReview(undefined);
+        dispatch({ type: 'reset' });
+    }
 
     return (
         <div className="omok-page">
@@ -50,9 +65,11 @@ export default function BlindOmokPage({ title, modeTitle }) {
                     </div>
                     <figure>
                         <OmokBoard
-                            game={game}
-                            canPlace={canPlace}
-                            onPlay={(row, col) => dispatch({ type: 'play', row, col, owner: settings.side })}
+                            moves={reviewFrame?.moves ?? game.moves}
+                            preview={phase === 'setup'}
+                            revealed={reviewFrame?.revealed ?? (hintExpiresAt !== null)}
+                            winningLines={reviewFrame?.winningLines}
+                            placement={placement}
                         />
                         <figcaption>
                             {Object.entries(boardNotes).map(([state, note]) => (
@@ -60,6 +77,15 @@ export default function BlindOmokPage({ title, modeTitle }) {
                             ))}
                         </figcaption>
                     </figure>
+                    {reviewFrame && (
+                        <OmokReview
+                            moveNumber={reviewFrame.moveNumber}
+                            moveCount={reviewFrame.moveCount}
+                            colorMode={reviewFrame.colorMode}
+                            onSeek={(moveNumber) => setReview((current) => ({ ...current, moveNumber }))}
+                            onColorModeChange={(colorMode) => setReview((current) => ({ ...current, colorMode }))}
+                        />
+                    )}
                 </section>
                 <div className="omok-panels">
                     <GameSettings
@@ -79,7 +105,7 @@ export default function BlindOmokPage({ title, modeTitle }) {
                         onColorChange={(colorId) => dispatch({ type: 'selectColor', colorId })}
                         onHint={() => dispatch({ type: 'useHint', now: performance.now() })}
                         onStart={() => dispatch({ type: 'start' })}
-                        onReset={() => dispatch({ type: 'reset' })}
+                        onReset={resetGame}
                     />
                     <GameRules />
                 </div>

@@ -86,6 +86,17 @@ export function createOmokGame(settings = {
     };
 }
 
+export function createDefaultAiGame() {
+    const game = createOmokGame();
+    return omokReducer({
+        ...game,
+        settings: {
+            ...game.settings,
+            colorIds: [...REQUIRED_COLOR_IDS, 'red', 'orange', 'yellow', 'green', 'blue'],
+        },
+    }, { type: 'start' });
+}
+
 export function canPlay(game, owner) {
     return game.phase === 'playing' && game.turn === owner && game.hintExpiresAt === null;
 }

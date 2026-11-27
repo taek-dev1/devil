@@ -3,8 +3,50 @@ import { test } from 'node:test';
 import { COLOR_LIMIT, REQUIRED_COLOR_IDS, STONE_COLORS } from './omokColors.js';
 import {
     BLACK, WHITE, BOARD_SIZE, HINT_DURATION, HINT_LIMIT, canPlay, canUseHint, cellIndex, createOmokGame,
-    getGameStatus, getVisibleColor, getWinningLines, omokReducer,
+    createDefaultAiGame, getGameStatus, getVisibleColor, getWinningLines, omokReducer,
 } from './omokGame.js';
+
+test('AI page entry creates a fresh, immediately playable default game', () => {
+    const game = createDefaultAiGame();
+    const otherEntry = createDefaultAiGame();
+    assert.deepEqual(game, otherEntry);
+    assert.notEqual(game.board, otherEntry.board);
+    assert.notEqual(game.settings.colorIds, otherEntry.settings.colorIds);
+    assert.deepEqual(game.settings, {
+        side: BLACK,
+        difficulty: 'medium',
+        colorIds: ['black', 'white', 'red', 'orange', 'yellow', 'green', 'blue'],
+    });
+    assert.ok(game.board.every((cell) => cell === null));
+    assert.equal(game.selectedColor, 'black');
+    assert.equal(game.turn, BLACK);
+    assert.equal(game.hintsLeft, HINT_LIMIT);
+    assert.equal(getGameStatus(game), 'player');
+    assert.equal(canUseHint(game), true);
+    assert.equal(play(game, 7, 7).moves[0].displayColor, 'black');
+});
+
+test('reset from the auto-started game enters setup and only an explicit start resumes play', () => {
+    const entry = createDefaultAiGame();
+    const reset = omokReducer(play(entry, 7, 7), { type: 'reset' });
+    assert.equal(reset.phase, 'setup');
+    assert.deepEqual(reset.settings, entry.settings);
+    assert.deepEqual(reset.moves, []);
+    assert.equal(play(reset, 7, 7), reset);
+
+    let edited = omokReducer(reset, { type: 'setSide', side: WHITE });
+    edited = omokReducer(edited, { type: 'setDifficulty', difficulty: 'hard' });
+    edited = omokReducer(edited, { type: 'toggleColor', colorId: 'blue' });
+    edited = omokReducer(edited, { type: 'toggleColor', colorId: 'navy' });
+    const game = start(edited);
+    assert.deepEqual(game.settings, {
+        side: WHITE,
+        difficulty: 'hard',
+        colorIds: ['black', 'white', 'red', 'orange', 'yellow', 'green', 'navy'],
+    });
+    assert.equal(game.selectedColor, 'white');
+    assert.equal(getGameStatus(game), 'ai');
+});
 
 function play(game, row, col, owner = game.turn) {
     return omokReducer(game, { type: 'play', row, col, owner });

@@ -70,12 +70,10 @@ function BoardTargets({ id, board, tone, onPlay }) {
     );
 }
 
-export default function OmokBoard({ game, canPlace, onPlay }) {
+export default function OmokBoard({ moves, preview, revealed, winningLines = [], placement }) {
     const id = useId();
-    const { board, moves, phase, hintExpiresAt, selectedColor, result } = game;
-    const preview = phase === 'setup';
-    const revealed = phase === 'finished' || hintExpiresAt !== null;
     const stones = preview ? previewStones : moves;
+    const latest = moves.at(-1);
 
     return (
         <svg className="omok-board" viewBox={`0 0 ${viewSize} ${viewSize}`} role="img" aria-labelledby={`${id}-title`}>
@@ -114,10 +112,10 @@ export default function OmokBoard({ game, canPlace, onPlay }) {
                     row={stone.row}
                     col={stone.col}
                     tone={preview ? stone.tone : getVisibleColor(stone, revealed)}
-                    latest={stone === moves.at(-1)}
+                    latest={stone === latest}
                 />
             ))}
-            {result?.winningLines.map((line) => {
+            {winningLines.map((line) => {
                 const first = line[0];
                 const last = line.at(-1);
                 return (
@@ -133,7 +131,7 @@ export default function OmokBoard({ game, canPlace, onPlay }) {
                     />
                 );
             })}
-            {canPlace && <BoardTargets id={id} board={board} tone={selectedColor} onPlay={onPlay} />}
+            {placement && <BoardTargets id={id} {...placement} />}
         </svg>
     );
 }
