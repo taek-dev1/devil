@@ -12,7 +12,7 @@ export const DIFFICULTIES = [
     { id: 'hard', name: '상' },
 ];
 
-const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+export const DIRECTIONS = [[0, 1], [1, 0], [1, 1], [1, -1]];
 const cellCount = BOARD_SIZE ** 2;
 
 export function otherSide(owner) {
@@ -23,21 +23,29 @@ export function cellIndex(row, col) {
     return row * BOARD_SIZE + col;
 }
 
-function isOnBoard(row, col) {
+export function isOnBoard(row, col) {
     return Number.isInteger(row) && Number.isInteger(col) &&
         row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 }
 
-function collectStones(board, row, col, rowStep, colStep, owner) {
-    const stones = [];
+export function isEmptyCell(board, row, col) {
+    return isOnBoard(row, col) && board[cellIndex(row, col)] === null;
+}
+
+export function countStones(board, row, col, rowStep, colStep, owner) {
+    let count = 0;
     while (isOnBoard(row, col)) {
         const stone = board[cellIndex(row, col)];
         if (stone?.owner !== owner) break;
-        stones.push(stone);
+        count++;
         row += rowStep;
         col += colStep;
     }
-    return stones;
+    return count;
+}
+
+export function isWinningLength(length) {
+    return length === 5 || length === 6;
 }
 
 export function getWinningLines(board, row, col) {
@@ -46,12 +54,15 @@ export function getWinningLines(board, row, col) {
     if (!stone) return [];
 
     const lines = [];
-    for (const [dr, dc] of directions) {
-        const before = collectStones(board, row - dr, col - dc, -dr, -dc, stone.owner);
-        const after = collectStones(board, row + dr, col + dc, dr, dc, stone.owner);
-        const length = before.length + 1 + after.length;
-        if (length === 5 || length === 6) {
-            lines.push([...before.reverse(), stone, ...after]);
+    for (const [dr, dc] of DIRECTIONS) {
+        const before = countStones(board, row - dr, col - dc, -dr, -dc, stone.owner);
+        const after = countStones(board, row + dr, col + dc, dr, dc, stone.owner);
+        const length = before + 1 + after;
+        if (isWinningLength(length)) {
+            lines.push(Array.from({ length }, (_, index) => {
+                const offset = index - before;
+                return board[cellIndex(row + offset * dr, col + offset * dc)];
+            }));
         }
     }
     return lines;
@@ -99,9 +110,8 @@ export function getGameStatus(game, aiThinking = false) {
 }
 
 function playStone(game, { row, col, owner }) {
-    if (!canPlay(game, owner) || !isOnBoard(row, col)) return game;
+    if (!canPlay(game, owner) || !isEmptyCell(game.board, row, col)) return game;
     const index = cellIndex(row, col);
-    if (game.board[index]) return game;
 
     const displayColor = owner === game.settings.side
         ? game.selectedColor
@@ -164,6 +174,9 @@ export function omokReducer(game, action) {
             return { ...game, selectedColor: action.colorId };
         case 'play':
             return playStone(game, action);
+        case 'playAi':
+            if (action.expectedBoard !== game.board) return game;
+            return playStone(game, { row: action.row, col: action.col, owner: otherSide(game.settings.side) });
         case 'useHint':
             if (!canUseHint(game)) return game;
             return { ...game, hintsLeft: game.hintsLeft - 1, hintExpiresAt: action.now + HINT_DURATION };

@@ -85,7 +85,17 @@
 }
 
 .omok-board-card figcaption {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     margin-top: 10px;
+}
+
+.omok-board-card figcaption span {
+    grid-area: 1 / 1;
+}
+
+.omok-board-card figcaption [aria-hidden='true'] {
+    visibility: hidden;
 }
 
 .omok-panel fieldset {
@@ -202,7 +212,14 @@
     flex-wrap: wrap;
 }
 
+.omok-hint-button {
+    min-inline-size: 6em;
+    white-space: nowrap;
+}
+
 .omok-current-status {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     padding: 10px 12px;
     margin-bottom: 8px;
     border: 1px solid var(--omok-border);
@@ -210,6 +227,15 @@
     background: #101827;
     color: var(--omok-accent);
     font-size: 21px;
+    font-variant-numeric: tabular-nums;
+}
+
+.omok-current-status > strong {
+    grid-area: 1 / 1;
+}
+
+.omok-status-sizing {
+    visibility: hidden;
 }
 
 .omok-current-status .omok-note {

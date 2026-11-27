@@ -1,41 +1,39 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import OmokBoard from './OmokBoard';
 import { GameSettings, GameStatus, GameControls, GameRules } from './OmokPanels';
 import { STONE_COLORS } from './omokColors';
-import { BOARD_SIZE, canPlay, canUseHint, createOmokGame, getGameStatus, omokReducer } from './omokGame';
+import { BOARD_SIZE, HINT_DURATION, canPlay, canUseHint, createOmokGame, getGameStatus, omokReducer } from './omokGame';
+import { scheduleHintCountdown } from './omokHintTimer';
+import { useOmokAi } from './useOmokAi';
 import './BlindOmokPage.css';
 
 const boardNotes = {
     setup: '보드 미리보기 · 예시 돌이 표시됩니다.',
-    player: '빈 교차점을 클릭하거나 터치해 돌을 놓으세요.',
+    playing: '내 차례에 빈 교차점을 클릭하거나 터치해 돌을 놓으세요.',
     hint: '실제 흑백을 공개하는 동안 착수를 멈춥니다.',
-    win: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
-    loss: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
-    draw: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
+    finished: '게임 종료 · 모든 돌의 실제 흑백을 공개했습니다.',
 };
 
 export default function BlindOmokPage({ title, modeTitle }) {
     const [game, dispatch] = useReducer(omokReducer, undefined, createOmokGame);
+    const [countdown, setCountdown] = useState(null);
     const { settings, phase, selectedColor, hintsLeft, hintExpiresAt } = game;
     const palette = STONE_COLORS.filter(({ id }) => settings.colorIds.includes(id));
-    const status = getGameStatus(game);
+    const ai = useOmokAi(game, dispatch);
+    const status = getGameStatus(game, ai.thinking);
     const canPlace = canPlay(game, settings.side);
+    const boardNote = hintExpiresAt !== null ? 'hint' : phase;
+    const hintSeconds = hintExpiresAt === null ? null
+        : countdown?.expiresAt === hintExpiresAt ? countdown.seconds : HINT_DURATION / 1000;
 
     useEffect(() => {
         if (hintExpiresAt === null) return;
 
-        let timer;
-        function expireHint() {
-            const now = performance.now();
-            const remaining = hintExpiresAt - now;
-            if (remaining > 0) {
-                timer = window.setTimeout(expireHint, Math.ceil(remaining));
-            } else {
-                dispatch({ type: 'expireHint', now });
-            }
-        }
-        expireHint();
-        return () => window.clearTimeout(timer);
+        return scheduleHintCountdown(
+            hintExpiresAt,
+            (seconds) => setCountdown({ expiresAt: hintExpiresAt, seconds }),
+            (now) => dispatch({ type: 'expireHint', now }),
+        );
     }, [hintExpiresAt]);
 
     return (
@@ -56,7 +54,11 @@ export default function BlindOmokPage({ title, modeTitle }) {
                             canPlace={canPlace}
                             onPlay={(row, col) => dispatch({ type: 'play', row, col, owner: settings.side })}
                         />
-                        {boardNotes[status] && <figcaption>{boardNotes[status]}</figcaption>}
+                        <figcaption>
+                            {Object.entries(boardNotes).map(([state, note]) => (
+                                <span key={state} aria-hidden={state !== boardNote}>{note}</span>
+                            ))}
+                        </figcaption>
                     </figure>
                 </section>
                 <div className="omok-panels">
@@ -67,7 +69,7 @@ export default function BlindOmokPage({ title, modeTitle }) {
                         onDifficultyChange={(difficulty) => dispatch({ type: 'setDifficulty', difficulty })}
                         onToggleColor={(colorId) => dispatch({ type: 'toggleColor', colorId })}
                     />
-                    <GameStatus side={settings.side} status={status} />
+                    <GameStatus side={settings.side} status={status} hintSeconds={hintSeconds} aiFailed={ai.failed} onRetry={ai.retry} />
                     <GameControls
                         palette={palette}
                         phase={phase}
